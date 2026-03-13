@@ -79,6 +79,7 @@ export const I18N = {
       createPlan: "СОЗДАТЬ ПЛАН",
       createTest: "СОЗДАТЬ ТЕСТ",
       exportDocx: "ВЫГРУЗИТЬ DOCX",
+      exportDocxDisabled: "НЕТ ДАННЫХ ДЛЯ ЭКСПОРТА",
       sections: {
         goals: "Цели урока",
         equipment: "Оборудование",
@@ -163,6 +164,7 @@ export const I18N = {
       createPlan: "ЖОСПАР ҚҰРУ",
       createTest: "ТЕСТ ҚҰРУ",
       exportDocx: "DOCX ЖҮКТЕУ",
+      exportDocxDisabled: "ЭКСПОРТҚА ДЕРЕК ЖОҚ",
       sections: {
         goals: "Сабақтың мақсаты",
         equipment: "Қажетті құралдар",
@@ -247,6 +249,7 @@ export const I18N = {
       createPlan: "CREATE PLAN",
       createTest: "CREATE TEST",
       exportDocx: "EXPORT DOCX",
+      exportDocxDisabled: "NO DATA TO EXPORT",
       sections: {
         goals: "Lesson objectives",
         equipment: "Equipment",
