@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { GraduationCap, FileText, ChevronRight, LayoutGrid, Gamepad2 } from "lucide-react";
+import { GraduationCap, FileText, ChevronRight, LayoutGrid, Gamepad2, BookOpen, Target, Briefcase } from "lucide-react";
 import { I18N as t } from "../lib/i18n";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
@@ -10,18 +10,41 @@ export default function HubPage({ lang, setLang, user, setUser, ...accessProps }
   const isStudent = user?.role === 'student';
 
   const hubT = {
-    RU: { teacher: "ДЛЯ УЧИТЕЛЕЙ", teacherDesc: "Создание и автоматизация уроков, AI помощник, планы", student: "ДЛЯ УЧЕНИКОВ", studentDesc: "Обучающие игры, тесты, награды и прогресс", denied: "ТОЛЬКО ДЛЯ УЧИТЕЛЕЙ", gamesTitle: "ИГРОТЕКА" },
-    KZ: { teacher: "МҰҒАЛІМДЕРГЕ", teacherDesc: "Сабақтарды құрастыру және автоматтандыру, AI көмекші", student: "ОҚУШЫЛАРҒА", studentDesc: "Оқу ойындары, тесттер, марапаттар", denied: "МҰҒАЛІМДЕРГЕ ҒАНА", gamesTitle: "ОЙЫН ХАБЫ" },
-    EN: { teacher: "FOR TEACHERS", teacherDesc: "Lesson planning, automation, AI assistant", student: "FOR STUDENTS", studentDesc: "Learning games, quizzes, rewards", denied: "TEACHERS ONLY", gamesTitle: "GAME LIBRARY" }
+    RU: { 
+      teacher: "ДЛЯ УЧИТЕЛЕЙ", teacherDesc: "Создание и автоматизация уроков, AI помощник, планы", 
+      student: "ДЛЯ УЧЕНИКОВ", studentDesc: "Обучающие игры, тесты, награды и прогресс", 
+      denied: "ТОЛЬКО ДЛЯ УЧИТЕЛЕЙ", gamesTitle: "ИГРОТЕКА",
+      university: "УНИВЕРСИТЕТ", universityDesc: "Курсы и силлабусы для высшего образования",
+      exams: "ЭКЗАМЕНЫ", examsDesc: "Подготовка к ЕНТ, IELTS, SAT",
+      professional: "ПРОФЕССИОНАЛЬНЫЕ", professionalDesc: "Специализированные курсы и тренинги"
+    },
+    KZ: { 
+      teacher: "МҰҒАЛІМДЕРГЕ", teacherDesc: "Сабақтарды құрастыру және автоматтандыру, AI көмекші", 
+      student: "ОҚУШЫЛАРҒА", studentDesc: "Оқу ойындары, тесттер, марапаттар", 
+      denied: "МҰҒАЛІМДЕРГЕ ҒАНА", gamesTitle: "ОЙЫН ХАБЫ",
+      university: "УНИВЕРСИТЕТ", universityDesc: "Жоғары білім үшін курстар мен силлабустар",
+      exams: "ЕМТИХАНДАР", examsDesc: "ЕНТ, IELTS, SAT дайындығы",
+      professional: "КӘСІБИ", professionalDesc: "Арнайы курстар мен тренингтер"
+    },
+    EN: { 
+      teacher: "FOR TEACHERS", teacherDesc: "Lesson planning, automation, AI assistant", 
+      student: "FOR STUDENTS", studentDesc: "Learning games, quizzes, rewards", 
+      denied: "TEACHERS ONLY", gamesTitle: "GAME LIBRARY",
+      university: "UNIVERSITY", universityDesc: "Courses and syllabi for higher education",
+      exams: "EXAMS", examsDesc: "Preparation for UNT, IELTS, SAT",
+      professional: "PROFESSIONAL", professionalDesc: "Specialized courses and training"
+    }
   }[lang] || {};
 
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-white font-sans pt-[120px]">
       <Header lang={lang} setLang={setLang} user={user} setUser={setUser} {...accessProps} />
 
-      <main className="max-w-6xl mx-auto px-10 py-20 text-center">
+      <main className="max-w-7xl mx-auto px-10 py-20 text-center">
         <h1 className="text-7xl font-black uppercase mb-24 tracking-tighter italic">{cur.title}</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-[500px]">
+        
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-[500px] mb-16">
           
           <Link to="/tools" className={`group relative p-12 bg-white dark:bg-zinc-900 rounded-[50px] border-[4px] border-black dark:border-white shadow-[12px_12px_0px_0px_rgba(37,99,235,1)] hover:shadow-none hover:translate-x-2 hover:translate-y-2 transition-all flex flex-col justify-between text-left h-full ${isStudent ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
             <div>
@@ -47,6 +70,17 @@ export default function HubPage({ lang, setLang, user, setUser, ...accessProps }
             <div className="flex items-center gap-2 font-black text-sm uppercase tracking-[0.2em] text-black dark:text-white group-hover:gap-4 transition-all italic mt-8">{cur.go} <ChevronRight size={20} strokeWidth={3} /></div>
           </Link>
         </div>
+
+        {/* Student Test Join */}
+        {isStudent && (
+          <div className="text-center mb-16">
+            <Link to="/join-test" className="inline-flex items-center gap-4 px-8 py-6 bg-green-600 text-white rounded-2xl font-black uppercase shadow-[6px_6px_0_0_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition">
+              <Target size={32} />
+              Присоединиться к тесту
+            </Link>
+          </div>
+        )}
+
       </main>
       <Footer />
     </div>

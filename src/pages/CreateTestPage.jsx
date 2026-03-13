@@ -4,18 +4,30 @@ import { ChevronLeft, Play, RefreshCw, Eye, X, History, Sparkles, Copy, Check } 
 import ReactMarkdown from 'react-markdown';
 
 import { I18N as t } from '../lib/i18n';
-import { buildPrompt } from '../lib/prompt';
 import api from '../api';
 import Header from "../components/Header";
+import { generateAIPrompt, extractJsonFromText } from '../services/aiService';
+import { generateIELTS, generateSAT, generateENT } from '../lib/prompt/examPrompts';
 
 const API_URL = 'http://localhost:8000/api';
 
 
-const CreateTestPage = ({ lang, promptConfig, ...accessProps }) => {
+const CreateTestPage = ({ lang, ...accessProps }) => {
   // --- State Management ---
   const [topic, setTopic] = useState('');
   const [subject, setSubject] = useState('');
   const [grade, setGrade] = useState('5');
+  const [examType, setExamType] = useState('IELTS');
+  const [section, setSection] = useState('Reading');
+  const [difficulty, setDifficulty] = useState('medium');
+  const [questionCount, setQuestionCount] = useState(10);
+
+  // Keep section in sync when exam changes
+  useEffect(() => {
+    if (examType === 'IELTS') setSection('Reading');
+    if (examType === 'SAT') setSection('Math');
+    if (examType === 'ENT') setSection('Mathematics');
+  }, [examType]);
   const [loading, setLoading] = useState(false);
   
   const [generatedTest, setGeneratedTest] = useState(null); 
@@ -33,12 +45,6 @@ const CreateTestPage = ({ lang, promptConfig, ...accessProps }) => {
   const [lessonContext, setLessonContext] = useState("");
   const [copied, setCopied] = useState(false);
 
-  const [testUi, setTestUi] = useState({
-    difficulty: "medium",
-    total: 10,
-    includeAnswers: true,
-    shuffle: false,
-  });
 
   const cur = t[lang] || t.RU;
 
@@ -58,28 +64,54 @@ const CreateTestPage = ({ lang, promptConfig, ...accessProps }) => {
 
   const handleGenerate = async () => {
     setLoading(true); setAccessCode(null); setGeneratedTest(null); setReport(null); setSelectedStudent(null);
+
     try {
-        const vars = { lang, subject, topic, grade, details: "" };
-        const mergedCfg = { ...promptConfig, tests: { ...promptConfig?.tests, ...testUi } };
-        const promptText = buildPrompt("tests", vars, mergedCfg);
+      // Build prompt based on selected exam and section
+      let promptText = "";
+      if (examType === "IELTS") {
+        promptText = generateIELTS(section, difficulty, questionCount, lang);
+      } else if (examType === "SAT") {
+        promptText = generateSAT(section, difficulty, questionCount, lang);
+      } else {
+        // ENT
+        promptText = generateENT(subject || section, difficulty, questionCount, lang);
+      }
 
-        const gen = await api.generations.create({
-            type: 'test',
-            subject: subject || "Test", topic: topic, grade: grade, lang, prompt: promptText, status: "running"
-        });
+      // Store generation metadata for library and session features
+      const gen = await api.generations.create({
+        type: 'test',
+        subject: subject || examType,
+        topic: topic,
+        grade: grade,
+        lang,
+        prompt: promptText,
+        status: 'running'
+      });
 
-        let accumulatedText = "";
-        for await (const evt of api.generateStream({ prompt: promptText })) {
-            const delta = typeof evt === "string" ? evt : (evt?.type === "delta" ? evt.text : "");
-            if (delta) accumulatedText += delta;
-        }
+      // Generate with AI and parse JSON
+      const { raw, json } = await generateAIPrompt(promptText);
 
-        await api.generations.update(gen.id, { status: "done", result_md: accumulatedText });
-        const newTest = { id: gen.id, result_md: accumulatedText, topic, subject, access_code: null };
-        setGeneratedTest(newTest);
-        loadLibrary();
+      await api.generations.update(gen.id, { status: 'done', result_md: raw });
 
-    } catch (e) { console.error(e); alert("Generation Error"); } finally { setLoading(false); }
+      setGeneratedTest({
+        id: gen.id,
+        raw,
+        json,
+        examType,
+        section,
+        subject,
+        topic,
+        grade,
+      });
+
+      loadLibrary();
+
+    } catch (e) {
+      console.error(e);
+      alert("Generation Error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleStartSession = async () => {
@@ -134,6 +166,128 @@ const CreateTestPage = ({ lang, promptConfig, ...accessProps }) => {
       navigator.clipboard.writeText(aiReport);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+  };
+
+  const renderGeneratedTestContent = () => {
+    if (!generatedTest) return null;
+    const json = generatedTest.json;
+    if (!json) {
+      return <pre className="whitespace-pre-wrap text-xs">{generatedTest.raw || 'No generated data.'}</pre>;
+    }
+
+    // IELTS Reading / SAT Reading
+    if (json.passage && Array.isArray(json.questions)) {
+      return (
+        <div className="space-y-6">
+          <div>
+            <h3 className="font-black mb-2">Passage</h3>
+            <p className="whitespace-pre-wrap text-sm">{json.passage}</p>
+          </div>
+          <div>
+            <h3 className="font-black mb-2">Questions</h3>
+            <ol className="list-decimal list-inside space-y-4">
+              {json.questions.map((q, idx) => (
+                <li key={idx} className="space-y-2">
+                  <div className="font-bold">{q.question}</div>
+                  <div className="grid grid-cols-1 gap-2 text-sm">
+                    {Array.isArray(q.options) ? q.options.map((opt, oi) => (
+                      <div key={oi} className={`px-3 py-2 rounded-lg border ${q.answer === String.fromCharCode(65 + oi) ? 'bg-green-200 border-green-400' : 'bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-700'}`}>
+                        <span className="font-bold mr-2">{String.fromCharCode(65 + oi)}.</span> {opt}
+                      </div>
+                    )) : null}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      );
+    }
+
+    // IELTS Writing
+    if (json.task) {
+      return (
+        <div className="space-y-4">
+          <div className="font-black">Task</div>
+          <div className="whitespace-pre-wrap">{json.task}</div>
+          {json.instructions ? (
+            <>
+              <div className="font-black">Instructions</div>
+              <div className="whitespace-pre-wrap">{json.instructions}</div>
+            </>
+          ) : null}
+        </div>
+      );
+    }
+
+    // IELTS Listening
+    if (json.dialog && Array.isArray(json.questions)) {
+      return (
+        <div className="space-y-6">
+          <div>
+            <h3 className="font-black mb-2">Dialog</h3>
+            <p className="whitespace-pre-wrap text-sm">{json.dialog}</p>
+          </div>
+          <div>
+            <h3 className="font-black mb-2">Questions</h3>
+            <ol className="list-decimal list-inside space-y-4">
+              {json.questions.map((q, idx) => (
+                <li key={idx} className="space-y-2">
+                  <div className="font-bold">{q.question}</div>
+                  <div className="grid grid-cols-1 gap-2 text-sm">
+                    {Array.isArray(q.options) ? q.options.map((opt, oi) => (
+                      <div key={oi} className={`px-3 py-2 rounded-lg border ${q.answer === String.fromCharCode(65 + oi) ? 'bg-green-200 border-green-400' : 'bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-700'}`}>
+                        <span className="font-bold mr-2">{String.fromCharCode(65 + oi)}.</span> {opt}
+                      </div>
+                    )) : null}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      );
+    }
+
+    // IELTS Speaking (questions list)
+    if (Array.isArray(json.questions) && json.questions.every(q => typeof q === 'string')) {
+      return (
+        <div className="space-y-4">
+          <h3 className="font-black">Speaking Questions</h3>
+          <ol className="list-decimal list-inside space-y-2 text-sm">
+            {json.questions.map((q, idx) => (
+              <li key={idx}>{q}</li>
+            ))}
+          </ol>
+        </div>
+      );
+    }
+
+    // Generic question list
+    if (Array.isArray(json.questions)) {
+      return (
+        <div className="space-y-6">
+          <h3 className="font-black">Questions</h3>
+          <ol className="list-decimal list-inside space-y-4">
+            {json.questions.map((q, idx) => (
+              <li key={idx} className="space-y-2">
+                <div className="font-bold">{q.question}</div>
+                <div className="grid grid-cols-1 gap-2 text-sm">
+                  {Array.isArray(q.options) ? q.options.map((opt, oi) => (
+                    <div key={oi} className={`px-3 py-2 rounded-lg border ${q.answer === String.fromCharCode(65 + oi) ? 'bg-green-200 border-green-400' : 'bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-700'}`}>
+                      <span className="font-bold mr-2">{String.fromCharCode(65 + oi)}.</span> {opt}
+                    </div>
+                  )) : null}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      );
+    }
+
+    // Fallback: show raw JSON
+    return <pre className="whitespace-pre-wrap text-xs">{JSON.stringify(json, null, 2)}</pre>;
   };
 
   // --- AI Report Logic ---
@@ -249,7 +403,41 @@ const CreateTestPage = ({ lang, promptConfig, ...accessProps }) => {
            </div>
            <label className="font-bold block mb-2 opacity-60 text-xs uppercase tracking-widest">{cur.t || "Topic"}</label>
            <input value={topic} onChange={e => setTopic(e.target.value)} placeholder="Topic..." className="w-full p-4 bg-slate-100 dark:bg-zinc-800 rounded-xl font-bold outline-none mb-6" />
-           
+
+           <div className="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <label className="font-bold block mb-2 opacity-60 text-xs uppercase tracking-widest">Exam</label>
+                <select value={examType} onChange={e => setExamType(e.target.value)} className="w-full p-4 bg-slate-100 dark:bg-zinc-800 rounded-xl font-bold outline-none">
+                  <option value="IELTS">IELTS</option>
+                  <option value="SAT">SAT</option>
+                  <option value="ENT">ENT</option>
+                </select>
+              </div>
+              <div>
+                <label className="font-bold block mb-2 opacity-60 text-xs uppercase tracking-widest">Section</label>
+                <select value={section} onChange={e => setSection(e.target.value)} className="w-full p-4 bg-slate-100 dark:bg-zinc-800 rounded-xl font-bold outline-none">
+                  {examType === 'IELTS' && ["Reading", "Writing", "Listening", "Speaking"].map(s => <option key={s} value={s}>{s}</option>)}
+                  {examType === 'SAT' && ["Math", "Reading", "Writing and Language"].map(s => <option key={s} value={s}>{s}</option>)}
+                  {examType === 'ENT' && ["Mathematics", "History", "Reading", "Elective"].map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+           </div>
+
+           <div className="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <label className="font-bold block mb-2 opacity-60 text-xs uppercase tracking-widest">Difficulty</label>
+                <select value={difficulty} onChange={e => setDifficulty(e.target.value)} className="w-full p-4 bg-slate-100 dark:bg-zinc-800 rounded-xl font-bold outline-none">
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
+              <div>
+                <label className="font-bold block mb-2 opacity-60 text-xs uppercase tracking-widest">Questions</label>
+                <input type="number" min={1} max={50} value={questionCount} onChange={e => setQuestionCount(Number(e.target.value))} className="w-full p-4 bg-slate-100 dark:bg-zinc-800 rounded-xl font-bold outline-none" />
+              </div>
+           </div>
+
            <button 
                 onClick={handleGenerate} 
                 disabled={loading || !topic} 
@@ -336,8 +524,8 @@ const CreateTestPage = ({ lang, promptConfig, ...accessProps }) => {
                     )}
               </div>
 
-              <div className="bg-slate-50 dark:bg-zinc-800 p-6 rounded-2xl border-2 border-slate-200 dark:border-zinc-700 max-h-60 overflow-y-auto prose dark:prose-invert text-sm">
-                 <ReactMarkdown>{generatedTest.result_md}</ReactMarkdown>
+              <div className="bg-slate-50 dark:bg-zinc-800 p-6 rounded-2xl border-2 border-slate-200 dark:border-zinc-700 max-h-[420px] overflow-y-auto prose dark:prose-invert text-sm">
+                 {renderGeneratedTestContent()}
               </div>
            </div>
         )}

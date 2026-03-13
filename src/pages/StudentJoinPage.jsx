@@ -16,6 +16,8 @@ const StudentJoinPage = () => {
     if (!code || !name) return;
 
     setLoading(true);
+
+    // First try API join (requires auth)
     try {
       const res = await fetch(`${API_URL}/api/quiz/join`, {
         method: 'POST',
@@ -24,33 +26,43 @@ const StudentJoinPage = () => {
       });
 
       const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.error || 'Сессия не найдена');
-        return;
+      if (res.ok && data) {
+        const quizData = data.data?.quiz || data.quiz;
+        if (quizData) {
+          navigate('/student/test', {
+            state: {
+              quiz: quizData,
+              studentName: name.trim(),
+              isStudent: true,
+              sessionCode: code.trim(),
+            }
+          });
+          return;
+        }
       }
-
-      const quizData = data.data?.quiz || data.quiz;
-      
-      if (!quizData) {
-        alert("Ошибка данных теста");
-        return;
-      }
-
-      localStorage.setItem('student_quiz_session', JSON.stringify({
-        quiz: quizData,
-        studentName: name.trim(),
-        startTime: Date.now()
-      }));
-
-      navigate('/play');
-
     } catch (err) {
-      console.error(err);
-      alert('Ошибка сети');
-    } finally {
-      setLoading(false);
+      // ignore network errors and fallback to local session
     }
+
+    // Fallback: try local session (no auth required)
+    const localKey = `lessonlab_game_session_${code.trim()}`;
+    const localSession = localStorage.getItem(localKey);
+    if (localSession) {
+      const session = JSON.parse(localSession);
+      navigate('/student/test', {
+        state: {
+          ...session,
+          studentName: name.trim(),
+          isStudent: true,
+          sessionCode: code.trim(),
+        }
+      });
+      setLoading(false);
+      return;
+    }
+
+    alert('Сессия не найдена');
+    setLoading(false);
   };
 
   return (

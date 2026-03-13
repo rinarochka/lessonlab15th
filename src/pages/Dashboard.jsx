@@ -7,7 +7,7 @@ import api from "../api";
 import { cached, invalidatePrefixRaw, generationsListCached } from "../apiCache";
 import Header from "../components/Header";
 import { I18N as t, tr } from "../lib/i18n";
-import { buildPrompt } from "../lib/prompt";
+import { useAI } from "../hooks/useAI";
 
 function payloadToMarkdown(p, lang) {
   const sec = p?.sections || {};
@@ -109,11 +109,12 @@ export default function Dashboard({
     grade: "5",
     duration: "45",
   });
-  const [res, setRes] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [res, setRes] = useState(null);
   const [history, setHistory] = useState([]);
   const [activeId, setActiveId] = useState(null);
   const [activeMenu, setActiveMenu] = useState(null);
+
+  const { loading, error, result, run } = useAI();
 
   const navigate = useNavigate();
   const activeIdRef = useRef(null);
@@ -213,131 +214,11 @@ export default function Dashboard({
   const handleGenerate = async () => {
     if (!form.subject || !form.topic) return;
 
-    setLoading(true);
-    setRes("");
-
-    const vars = { lang, ...form };
-    const promptText = buildPrompt("lesson_plan", vars, promptConfig);
-
-    let createdGen = null;
-
-    try {
-      console.log("PROMPT:", promptText);
-
-      createdGen = await api.generations.create({
-        type: "lesson_plan",
-        ...form,
-        lang,
-        prompt: promptText,
-        status: "running",
-      });
-
-      console.log("GEN CREATED:", createdGen);
-
-      if (!createdGen?.id) {
-        throw new Error("Не удалось создать запись генерации");
-      }
-
-      setActiveId(createdGen.id);
-      activeIdRef.current = createdGen.id;
-      setHistory((prev) => [
-        { id: createdGen.id, name: form.topic, status: "running" },
-        ...prev,
-      ]);
-
-      let jsonText = "";
-
-      for await (const delta of api.generateStream({ prompt: promptText })) {
-        console.log("STREAM DELTA:", delta);
-        jsonText += typeof delta === "string" ? delta : delta?.text || "";
-      }
-
-      console.log("FINAL MODEL TEXT:", jsonText);
-
-      if (!jsonText.trim()) {
-        await api.generations.update(createdGen.id, {
-          status: "failed",
-          result_md: "Error: empty response from model",
-        });
-        setRes("Error: empty response from model");
-        invalidatePrefixRaw("generations.list");
-        return;
-      }
-
-      let payload = null;
-      try {
-        payload = JSON.parse(extractJsonObject(jsonText));
-      } catch (e) {
-        console.error("JSON PARSE ERROR:", e);
-        payload = null;
-      }
-
-      if (!payload) {
-        const message = `Error: invalid JSON from model\n\n${jsonText}`;
-        await api.generations.update(createdGen.id, {
-          status: "failed",
-          result_md: message,
-        });
-        setRes(message);
-        invalidatePrefixRaw("generations.list");
-        return;
-      }
-
-      if (!isValidLessonPlanPayload(payload)) {
-        const message = `Error: invalid payload structure\n\n${JSON.stringify(payload, null, 2)}`;
-        await api.generations.update(createdGen.id, {
-          status: "failed",
-          result_md: message,
-          result_json: payload,
-        });
-        setRes(message);
-        invalidatePrefixRaw("generations.list");
-        return;
-      }
-
-      const md = payloadToMarkdown(payload, lang);
-      setRes(md);
-
-      await api.generations.update(createdGen.id, {
-        status: "done",
-        result_md: md,
-        result_json: payload,
-        result_json_version: 1,
-        template_key: "kmj_kazakh_january",
-      });
-
-      invalidatePrefixRaw("generations.list");
-
-      const hour = new Date().getHours();
-      if (hour >= 0 && hour < 5) {
-        grantAchievement({ title: "Ночная смена", reward: 100, key: "night_owl" });
-      }
-
-      if (history.length === 9) {
-        grantAchievement({ title: "Архитектор знаний", reward: 250, key: "architect_10" });
-      }
-    } catch (e) {
-      console.error("GENERATION ERROR:", e);
-
-      const message = `Error: ${e?.message || String(e)}`;
-      setRes(message);
-
-      if (createdGen?.id) {
-        try {
-          await api.generations.update(createdGen.id, {
-            status: "failed",
-            result_md: message,
-          });
-          invalidatePrefixRaw("generations.list");
-        } catch (updateErr) {
-          console.error("FAILED TO SAVE ERROR STATUS:", updateErr);
-        }
-      }
-    } finally {
-      setLoading(false);
+    const json = await run("lesson_plan", { ...form, lang }, { promptConfig });
+    if (json) {
+      setRes(json);
     }
   };
-
   const fontClass =
     fontSize === "lg" ? "text-lg" : fontSize === "xl" ? "text-xl" : "text-base";
 
@@ -516,7 +397,13 @@ export default function Dashboard({
 
         <section className="flex-1 p-14 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-3xl rounded-[40px] shadow-2xl border border-white/20 overflow-y-auto">
           <div className="prose dark:prose-invert max-w-none leading-relaxed italic">
-            <ReactMarkdown>{res || "..."}</ReactMarkdown>
+            {error ? (
+              <div className="text-red-600 dark:text-red-400">{error}</div>
+            ) : res ? (
+              <ReactMarkdown>{payloadToMarkdown(res, lang)}</ReactMarkdown>
+            ) : (
+              "..."
+            )}
           </div>
 
           <button

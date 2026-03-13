@@ -273,6 +273,40 @@ export default function ProfilePage({ lang, setLang, user, setUser }) {
         </div>
       )}
 
+      {/* Прогресс ученика */}
+      <div className="mt-12 bg-white dark:bg-zinc-900 p-8 rounded-[40px] border-[4px] border-black dark:border-white shadow-[8px_8px_0_0_#000]">
+        <h2 className="text-2xl font-black uppercase mb-6">Мой прогресс</h2>
+
+        <div className="space-y-4">
+          {(() => {
+            const progress = JSON.parse(localStorage.getItem('student_progress') || '[]');
+            if (progress.length === 0) {
+              return <p className="text-slate-500">Пока нет пройденных тестов.</p>;
+            }
+
+            return progress.reverse().map((item, idx) => (
+              <div key={idx} className="p-4 bg-slate-50 dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-700">
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="font-bold">{item.quizTitle}</h3>
+                  <span className="text-sm text-slate-500">{new Date(item.date).toLocaleDateString()}</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-lg font-bold text-green-600">
+                    {item.score}/{item.total} ({Math.round((item.score / item.total) * 100)}%)
+                  </div>
+                  <div className="flex-1 bg-slate-200 dark:bg-zinc-700 rounded-full h-2">
+                    <div
+                      className="bg-green-500 h-2 rounded-full"
+                      style={{ width: `${(item.score / item.total) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            ));
+          })()}
+        </div>
+      </div>
+
       <div className="mt-16">
         <Footer />
       </div>

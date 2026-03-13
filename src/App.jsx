@@ -15,8 +15,15 @@ import ProfilePage from "./pages/ProfilePage";
 import PromptsPage from "./pages/PromptsPage";
 import StudentJoinPage from "./pages/StudentJoinPage";
 import CreateTestPage from "./pages/CreateTestPage";
+import StudentTestPage from "./pages/StudentTestPage";
 import ToolsPage from './pages/ToolsPage';
 import GamesPage from './pages/GamesPage';
+import UniversityPage from './pages/UniversityPage';
+import ExamPrepPage from './pages/ExamPrepPage';
+import ProfessionalPage from './pages/ProfessionalPage';
+import PresentationsPage from './pages/PresentationsPage';
+import ConnectionsGame from './pages/ConnectionsGame';
+import CodenamesGame from './pages/CodenamesGame';
 
 import { DEFAULT_PROMPT_CONFIG } from "./lib/prompt";
 import ClassControlBar from './components/ClassControlBar';
@@ -105,7 +112,7 @@ export default function App() {
   // --- 4. ПРОПСЫ ---
   const accessProps = { grantAchievement, dark, setDark, fontSize, setFontSize, highContrast, setHighContrast, lang, setLang, user, setUser };
 
-  const activeRoutes = ["/hub", "/tools", "/games"];
+  const activeRoutes = ["/hub", "/tools", "/games", "/university", "/exam-prep", "/professional"];
   const isWidgetVisible = user && user.role === 'teacher' && activeRoutes.includes(location.pathname);
 
   return (
@@ -124,6 +131,15 @@ export default function App() {
           <Route path="/hub" element={<Page><Protected authReady={authReady} user={user}><HubPage {...accessProps} /></Protected></Page>} />
           <Route path="/tools" element={<Page><Protected authReady={authReady} user={user}><ToolsPage {...accessProps} /></Protected></Page>} />
           <Route path="/games" element={<Page><Protected authReady={authReady} user={user}><GamesPage {...accessProps} /></Protected></Page>} />
+          <Route path="/games/connections" element={<Page><Protected authReady={authReady} user={user}><ConnectionsGame {...accessProps} /></Protected></Page>} />
+          <Route path="/games/codenames" element={<Page><Protected authReady={authReady} user={user}><CodenamesGame {...accessProps} /></Protected></Page>} />
+          <Route path="/games/four-pictures" element={<Navigate to="/games" replace />} />
+          <Route path="/games/odd-one-out" element={<Navigate to="/games" replace />} />
+          <Route path="/games/crosswords" element={<Navigate to="/games" replace />} />
+          <Route path="/university" element={<Page><Protected authReady={authReady} user={user}><UniversityPage {...accessProps} /></Protected></Page>} />
+          <Route path="/exam-prep" element={<Page><Protected authReady={authReady} user={user}><ExamPrepPage {...accessProps} /></Protected></Page>} />
+          <Route path="/professional" element={<Page><Protected authReady={authReady} user={user}><ProfessionalPage {...accessProps} /></Protected></Page>} />
+          <Route path="/presentations" element={<Page><Protected authReady={authReady} user={user}><PresentationsPage {...accessProps} /></Protected></Page>} />
           
           {["/dashboard", "/generate"].map((path) => (
             <Route key={path} path={path} element={<Page><Protected authReady={authReady} user={user}><Dashboard {...accessProps} promptConfig={promptConfig} /></Protected></Page>} />
@@ -133,6 +149,7 @@ export default function App() {
           <Route path="/profile" element={<Page><Protected authReady={authReady} user={user}><ProfilePage {...accessProps} /></Protected></Page>} />
           <Route path="/prompts" element={<Page><Protected authReady={authReady} user={user}><PromptsPage {...accessProps} promptConfig={promptConfig} setPromptConfig={setPromptConfig} /></Protected></Page>} />
           <Route path="/join-test" element={<Page><Protected authReady={authReady} user={user}><StudentJoinPage {...accessProps} /></Protected></Page>} />
+          <Route path="/student/test" element={<Page><StudentTestPage /></Page>} />
           <Route path="/play" element={<QuizPlayer {...accessProps} />} />
           <Route path="*" element={<Navigate to={user ? "/hub" : "/"} replace />} />
         </Routes>
