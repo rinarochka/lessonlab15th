@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+// suppress deprecated warnings in dev
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+ini_set('display_errors', '0');
+
 // 1. Initial Setup
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $path   = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';

@@ -214,10 +214,53 @@ export default function Dashboard({
   const handleGenerate = async () => {
     if (!form.subject || !form.topic) return;
 
-    const json = await run("lesson_plan", { ...form, lang }, { promptConfig });
-    if (json) {
-      setRes(json);
+    let gen;
+    try {
+      gen = await api.generations.create({
+        subject: form.subject,
+        topic: form.topic,
+        details: form.details || null,
+        grade: parseInt(form.grade, 10) || 0,
+        duration: parseInt(form.duration, 10) || 0,
+        lang,
+        prompt: "lesson_plan",
+      });
+    } catch (e) {
+      console.error("Create generation failed", e);
+      return;
     }
+
+    setActiveId(gen.id);
+    setHistory((prev) => [
+      { id: gen.id, name: form.topic || `#${gen.id}`, status: "pending" },
+      ...prev,
+    ]);
+
+    const output = await run("lesson_plan", { ...form, lang }, { promptConfig });
+
+    if (!output) {
+      try {
+        await api.generations.update(gen.id, { status: "error", error: "Generation failed" });
+      } catch (err) {
+        console.error("Failed to update generation error status", err);
+      }
+      return;
+    }
+
+    try {
+      await api.generations.update(gen.id, {
+        status: "done",
+        result_md: payloadToMarkdown(output, lang),
+        result_json: output,
+      });
+    } catch (err) {
+      console.error("Failed to update generation result", err);
+    }
+
+    setRes(output);
+    setHistory((prev) =>
+      prev.map((item) => (item.id === gen.id ? { ...item, status: "done" } : item))
+    );
   };
   const fontClass =
     fontSize === "lg" ? "text-lg" : fontSize === "xl" ? "text-xl" : "text-base";

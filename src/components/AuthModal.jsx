@@ -43,9 +43,8 @@ export default function AuthModal({
   if (!isOpen) return null;
 
   const handleSubmit = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-
       if (mode === "signup") {
         if (!firstName.trim() || !lastName.trim()) {
           alert("Enter first and last name");
@@ -67,8 +66,9 @@ export default function AuthModal({
       setUser(me.user);
       closeModal();
       navigate("/hub");
-    } catch {
-      alert("Auth Error");
+    } catch (err) {
+      console.error("Auth error:", err);
+      alert(err?.message || "Auth Error");
     } finally {
       setLoading(false);
     }
@@ -93,12 +93,14 @@ export default function AuthModal({
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder={authT.firstName}
+                  autoComplete="given-name"
                   className="w-full p-5 bg-slate-50 dark:bg-zinc-800 rounded-2xl outline-none font-bold text-sm border border-transparent focus:border-blue-500"
                 />
                 <input
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder={authT.lastName}
+                  autoComplete="family-name"
                   className="w-full p-5 bg-slate-50 dark:bg-zinc-800 rounded-2xl outline-none font-bold text-sm border border-transparent focus:border-blue-500"
                 />
               </div>
@@ -116,6 +118,9 @@ export default function AuthModal({
           )}
 
           <input
+            id="auth-email"
+            name="email"
+            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onBlur={() => setShowEmailError(true)}
@@ -128,6 +133,9 @@ export default function AuthModal({
 
           <div className="relative">
             <input
+              id="auth-password"
+              name="password"
+              autoComplete="current-password"
               value={pass}
               onChange={(e) => setPass(e.target.value)}
               type={showPass ? "text" : "password"}

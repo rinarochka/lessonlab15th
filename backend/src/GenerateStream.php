@@ -95,7 +95,7 @@ final class GenerateStream
 
         if ($response === false) {
             $err = curl_error($ch);
-            curl_close($ch);
+            @curl_close($ch);
 
             self::sendEvent([
                 'type' => 'error',
@@ -107,7 +107,7 @@ final class GenerateStream
         }
 
         $httpCode = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-        curl_close($ch);
+        @curl_close($ch);
 
         if ($httpCode >= 400) {
             $decodedError = json_decode($response, true);
