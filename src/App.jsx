@@ -24,6 +24,7 @@ import ProfessionalPage from './pages/ProfessionalPage';
 import PresentationsPage from './pages/PresentationsPage';
 import ConnectionsGame from './pages/ConnectionsGame';
 import CodenamesGame from './pages/CodenamesGame';
+import FourPicturesGame from './pages/FourPicturesGame';
 
 import { DEFAULT_PROMPT_CONFIG } from "./lib/prompt";
 import ClassControlBar from './components/ClassControlBar';
@@ -133,7 +134,7 @@ export default function App() {
           <Route path="/games" element={<Page><Protected authReady={authReady} user={user}><GamesPage {...accessProps} /></Protected></Page>} />
           <Route path="/games/connections" element={<Page><Protected authReady={authReady} user={user}><ConnectionsGame {...accessProps} /></Protected></Page>} />
           <Route path="/games/codenames" element={<Page><Protected authReady={authReady} user={user}><CodenamesGame {...accessProps} /></Protected></Page>} />
-          <Route path="/games/four-pictures" element={<Navigate to="/games" replace />} />
+          <Route path="/games/four-pictures" element={<Page><Protected authReady={authReady} user={user}><FourPicturesGame {...accessProps} /></Protected></Page>} />
           <Route path="/games/odd-one-out" element={<Navigate to="/games" replace />} />
           <Route path="/games/crosswords" element={<Navigate to="/games" replace />} />
           <Route path="/university" element={<Page><Protected authReady={authReady} user={user}><UniversityPage {...accessProps} /></Protected></Page>} />

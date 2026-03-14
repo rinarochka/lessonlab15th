@@ -258,6 +258,7 @@ const GamesPage = ({ lang, setLang, user, setUser }) => {
           {/* 4. 4 Pictures 1 Word */}
           <Link 
             to="/games/four-pictures" 
+            state={{ topic: gameTopic, subject, grade, sessionCode, sessionGenId }}
             className="group bg-white dark:bg-zinc-900 p-10 rounded-[40px] border-[4px] border-black dark:border-white shadow-[8px_8px_0px_0px_#000] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all flex flex-col justify-between h-[360px]"
           >
             <div>

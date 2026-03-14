@@ -154,6 +154,15 @@ const api = {
     remove: async (id) => { await request(`/generations/${id}`, { method: 'DELETE' }); return true; }
   },
 
+
+
+  generateFourPicturesRound(payload) {
+    return request('/games/four-pictures/generate', {
+      method: 'POST',
+      body: JSON.stringify(payload || {})
+    });
+  },
+
   promptConfig: {
     get: () => request('/prompt-config', { method: 'GET' }),
     set: (config) => request('/prompt-config', { method: 'PUT', body: JSON.stringify({ config }) }),
