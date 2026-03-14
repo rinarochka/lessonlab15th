@@ -14,6 +14,7 @@ $config = require __DIR__ . '/../config.php';
 require __DIR__ . '/../src/DB.php';
 require __DIR__ . '/../src/AuthService.php';
 require __DIR__ . '/../src/Response.php';
+require __DIR__ . '/../src/FourPicturesGame.php';
 
 $db   = new DB($config['db']);
 $auth = new AuthService($db->pdo(), $config['auth']);
@@ -64,6 +65,11 @@ $body = in_array($method, ['POST','PUT','PATCH'], true) ? readJsonBodyOrFail() :
 if ($method === 'POST' && preg_match('#^/api/generate/stream/?$#', $path)) {
   require __DIR__ . '/../src/GenerateStream.php';
   \App\GenerateStream::handle($config, $body); 
+  exit;
+}
+
+if ($method === 'POST' && $path === '/api/games/four-pictures/generate') {
+  \App\FourPicturesGame::handle($config, $body);
   exit;
 }
 
