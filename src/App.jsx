@@ -18,6 +18,9 @@ import CreateTestPage from "./pages/CreateTestPage";
 import StudentTestPage from "./pages/StudentTestPage";
 import ToolsPage from './pages/ToolsPage';
 import GamesPage from './pages/GamesPage';
+import TeachersPage from './pages/TeachersPage';
+import TeacherWorkspacePage from './pages/TeacherWorkspacePage';
+import ClassroomPage from './pages/ClassroomPage';
 import UniversityPage from './pages/UniversityPage';
 import ExamPrepPage from './pages/ExamPrepPage';
 import ProfessionalPage from './pages/ProfessionalPage';
@@ -39,6 +42,11 @@ const Page = ({ children }) => (
     {children}
   </motion.div>
 );
+
+const RoleOnly = ({ user, role, children }) => {
+  if (!user) return null;
+  return user.role === role ? children : <Navigate to="/hub" replace />;
+};
 
 export default function App() {
   const location = useLocation();
@@ -113,7 +121,7 @@ export default function App() {
   // --- 4. ПРОПСЫ ---
   const accessProps = { grantAchievement, dark, setDark, fontSize, setFontSize, highContrast, setHighContrast, lang, setLang, user, setUser };
 
-  const activeRoutes = ["/hub", "/tools", "/games", "/university", "/exam-prep", "/professional"];
+  const activeRoutes = ["/hub", "/tools", "/teacher-workspace", "/classroom", "/university", "/exam-prep", "/professional"];
   const isWidgetVisible = user && user.role === 'teacher' && activeRoutes.includes(location.pathname);
 
   return (
@@ -130,8 +138,11 @@ export default function App() {
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Page><LandingPage {...accessProps} setIsAuthOpen={setIsAuthOpen} setAuthMode={setAuthMode} resetAuthFields={() => { setEmail(""); setPass(""); setShowEmailError(false); }} /></Page>} />
           <Route path="/hub" element={<Page><Protected authReady={authReady} user={user}><HubPage {...accessProps} /></Protected></Page>} />
-          <Route path="/tools" element={<Page><Protected authReady={authReady} user={user}><ToolsPage {...accessProps} /></Protected></Page>} />
+          <Route path="/tools" element={<Page><Protected authReady={authReady} user={user}><RoleOnly user={user} role="teacher"><ToolsPage {...accessProps} /></RoleOnly></Protected></Page>} />
           <Route path="/games" element={<Page><Protected authReady={authReady} user={user}><GamesPage {...accessProps} /></Protected></Page>} />
+          <Route path="/teachers" element={<Page><Protected authReady={authReady} user={user}><RoleOnly user={user} role="student"><TeachersPage {...accessProps} /></RoleOnly></Protected></Page>} />
+          <Route path="/teacher-workspace" element={<Page><Protected authReady={authReady} user={user}><RoleOnly user={user} role="teacher"><TeacherWorkspacePage {...accessProps} /></RoleOnly></Protected></Page>} />
+          <Route path="/classroom" element={<Page><Protected authReady={authReady} user={user}><ClassroomPage {...accessProps} /></Protected></Page>} />
           <Route path="/games/connections" element={<Page><Protected authReady={authReady} user={user}><ConnectionsGame {...accessProps} /></Protected></Page>} />
           <Route path="/games/codenames" element={<Page><Protected authReady={authReady} user={user}><CodenamesGame {...accessProps} /></Protected></Page>} />
           <Route path="/games/four-pictures" element={<Page><Protected authReady={authReady} user={user}><FourPicturesGame {...accessProps} /></Protected></Page>} />
@@ -143,7 +154,7 @@ export default function App() {
           <Route path="/presentations" element={<Page><Protected authReady={authReady} user={user}><PresentationsPage {...accessProps} /></Protected></Page>} />
           
           {["/dashboard", "/generate"].map((path) => (
-            <Route key={path} path={path} element={<Page><Protected authReady={authReady} user={user}><Dashboard {...accessProps} promptConfig={promptConfig} /></Protected></Page>} />
+            <Route key={path} path={path} element={<Page><Protected authReady={authReady} user={user}><RoleOnly user={user} role="teacher"><Dashboard {...accessProps} promptConfig={promptConfig} /></RoleOnly></Protected></Page>} />
           ))}
 
           <Route path="/create-test" element={<Page><Protected authReady={authReady} user={user}><CreateTestPage {...accessProps} promptConfig={promptConfig} /></Protected></Page>} />

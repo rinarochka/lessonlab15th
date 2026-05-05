@@ -11,8 +11,8 @@ export const I18N = {
   RU: {
     h: "ИСТОРИЯ", p: "ПАРАМЕТРЫ", r: "РЕЗУЛЬТАТ", s: "Предмет", t: "Тема", d: "Детали", g: "ГЕНЕРИРОВАТЬ",
     edit: "Изменить", del: "Удалить", exit: "ВЫХОД",
-    lt: { hero: "Планируйте уроки эффективно", sub: "Профессиональная система автоматизации учебных планов нового поколения.", login: "Войти", signup: "Регистрация", join: "Начать работу" },
-    hub: { title: "Выберите направление", tools: "Инструменты", games: "Игротека (Скоро)", go: "Открыть" },
+    lt: { hero: "Teach and Study", sub: "AI-платформа для учителей и учеников: быстрее готовьте уроки и подбирайте проверенных преподавателей.", login: "Войти", signup: "Регистрация", join: "Начать работу" },
+    hub: { title: "Учить и учиться проще", tools: "AI-инструменты", games: "Ученикам", go: "Открыть" },
     prof: { title: "Мой Профиль", mail: "Почта", stats: "Статистика", back: "Назад в Хаб", edit: "Редактировать", empty: "Пустое пространство", save: "Сохранить", cancel: "Отмена" },
     auth: {
       loginTitle: "С возвращением!",
@@ -96,8 +96,8 @@ export const I18N = {
   KZ: {
     h: "ТАРИХ", p: "ПАРАМЕТРЛЕР", r: "НӘТИЖЕ", s: "Пән", t: "Сабақ тақырыбы", d: "Мәліметтер", g: "ҚҰРАСТЫРУ",
     edit: "Өзгерту", del: "Өшіру", exit: "ШЫҒУ",
-    lt: { hero: "Сабақты тиімді жоспарлаңыз", sub: "Оқу жоспарларын автоматты төрде құрастыруға арналған кәсіби жүйе.", login: "Кіру", signup: "Тіркелу", join: "Жұмысты бастау" },
-    hub: { title: "Бағытты таңдаңыз", tools: "Құралдар", games: "Ойындар (Жақында)", go: "Ашу" },
+    lt: { hero: "Teach and Study", sub: "Мұғалімдер мен оқушыларға арналған AI-платформа: сабақ дайындау жылдам, оқытушы таңдау ыңғайлы.", login: "Кіру", signup: "Тіркелу", join: "Жұмысты бастау" },
+    hub: { title: "Оқыту мен оқуды жеңілдетеміз", tools: "AI құралдар", games: "Оқушыларға", go: "Ашу" },
     prof: { title: "Менің Профилім", mail: "Пошта", stats: "Статистика", back: "Хабқа қайту", edit: "Өңдеу", empty: "Бос орын", save: "Сақтау", cancel: "Бас тарту" },
     auth: {
       loginTitle: "Қош келдіңіз!",
@@ -181,8 +181,8 @@ export const I18N = {
   EN: {
     h: "HISTORY", p: "PARAMETERS", r: "RESULT", s: "Subject", t: "Topic", d: "Details", g: "GENERATE",
     edit: "Edit", del: "Delete", exit: "EXIT",
-    lt: { hero: "Plan Lessons Effectively", sub: "Professional next-generation automated lesson planning system.", login: "Sign In", signup: "Sign Up", join: "Get Started" },
-    hub: { title: "Choose Direction", tools: "Tools", games: "Games (Soon)", go: "Open" },
+    lt: { hero: "Teach and Study", sub: "AI platform for teachers and students: prepare lessons faster and match with trusted tutors easier.", login: "Sign In", signup: "Sign Up", join: "Get Started" },
+    hub: { title: "Teach and learn smarter", tools: "AI Tools", games: "For Students", go: "Open" },
     prof: { title: "My Profile", mail: "Email", stats: "Statistics", back: "Back to Hub", edit: "Edit Profile", empty: "Empty Space", save: "Save", cancel: "Cancel" },
     auth: {
       loginTitle: "Welcome back!",

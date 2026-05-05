@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, FileQuestion, Lightbulb, GraduationCap, Award, Briefcase, Presentation } from 'lucide-react';
+import { BookOpen, FileQuestion, Lightbulb, GraduationCap, Award, Briefcase, Presentation, MessageCircle } from 'lucide-react';
 import { tr } from "../lib/i18n";
 import Header from "../components/Header";
 
@@ -155,6 +155,30 @@ const ToolsPage = ({ lang, setLang, user, setUser, ...accessProps }) => {
 
           {/* 6. Презентации */}
           <Link 
+            to="/classroom" 
+            className="group bg-white dark:bg-zinc-900 p-8 rounded-[40px] border-[4px] border-black dark:border-white shadow-[8px_8px_0px_0px_#f59e0b] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all flex flex-col justify-between h-[320px]"
+          >
+            <div>
+              <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/30 rounded-2xl flex items-center justify-center mb-6 border-2 border-black/10">
+                <MessageCircle size={32} className="text-yellow-600" />
+              </div>
+              <h3 className="text-3xl font-black uppercase tracking-tight mb-2">
+                {lang === 'EN' ? 'Classroom' : lang === 'KZ' ? 'Сынып' : 'Класс'}
+              </h3>
+              <p className="text-slate-500 font-bold text-sm leading-tight">
+                {lang === 'EN' ? "Publish materials and chat with students." : 
+                 lang === 'KZ' ? "Материал жариялап, оқушылармен сөйлесіңіз." : 
+                 "Публикуйте материалы и общайтесь со студентами."}
+              </p>
+            </div>
+            <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+               <span className="font-black uppercase text-xs tracking-widest bg-black text-white px-4 py-2 rounded-full">
+                   {tr(lang, "hub.go")}
+               </span>
+            </div>
+          </Link>
+
+          <Link 
             to="/presentations" 
             className="group bg-white dark:bg-zinc-900 p-8 rounded-[40px] border-[4px] border-black dark:border-white shadow-[8px_8px_0px_0px_#ef4444] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all flex flex-col justify-between h-[320px]"
           >
@@ -166,9 +190,9 @@ const ToolsPage = ({ lang, setLang, user, setUser, ...accessProps }) => {
                 {lang === 'EN' ? 'Presentations' : lang === 'KZ' ? 'Презентациялар' : 'Презентации'}
               </h3>
               <p className="text-slate-500 font-bold text-sm leading-tight">
-                {lang === 'EN' ? "Create beautiful HTML presentations for your lessons." : 
-                 lang === 'KZ' ? "Сабақтарыңызға арналған әдемі HTML презентациялар жасаңыз." : 
-                 "Создавайте красивые HTML презентации для ваших уроков."}
+                {lang === 'EN' ? "Create lesson presentations in PPTX format." : 
+                 lang === 'KZ' ? "Сабаққа арналған PPTX презентациялар жасаңыз." : 
+                 "Создавайте презентации для уроков в формате PPTX."}
               </p>
             </div>
             <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">

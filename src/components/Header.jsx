@@ -43,7 +43,7 @@ export default function Header({
           to={logoTarget} 
           className="font-black text-2xl italic tracking-tighter flex items-center gap-3 text-blue-600 hover:opacity-80 transition-opacity"
         >
-          <GraduationCap size={32} /> LESSON.LAB
+          <GraduationCap size={32} /> Teach and Study
         </Link>
       </div>
 

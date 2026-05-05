@@ -1,4 +1,5 @@
 const API_PREFIX = '/api';
+const DEMO_USER_KEY = 'teach_and_study_demo_user';
 
 // Utility helper for delay (Exponential Backoff)
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -59,32 +60,111 @@ async function request(path, options = {}, retries = 3) {
   }
 }
 
+function nameFromEmail(email) {
+  const local = String(email || "").split("@")[0] || "Guest";
+  const parts = local
+    .replace(/[._-]+/g, " ")
+    .split(" ")
+    .filter(Boolean);
+
+  const format = (value) => value ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase() : "";
+  return {
+    first_name: format(parts[0]) || "Guest",
+    last_name: format(parts.slice(1).join(" ")) || "",
+  };
+}
+
+function createDemoUser(email, payload = {}) {
+  const derived = nameFromEmail(email);
+  const user = {
+    id: 'demo-user',
+    email,
+    first_name: payload.first_name || derived.first_name,
+    last_name: payload.last_name || derived.last_name,
+    role: payload.role || 'teacher',
+    coins: 120,
+    achievements: [],
+    is_demo: true,
+  };
+  localStorage.setItem(DEMO_USER_KEY, JSON.stringify(user));
+  return user;
+}
+
+function getDemoUser() {
+  try {
+    const raw = localStorage.getItem(DEMO_USER_KEY);
+    if (!raw) return null;
+    const user = JSON.parse(raw);
+    if (user?.first_name === "Teach" && user?.last_name === "Study") {
+      const derived = nameFromEmail(user.email);
+      const migrated = { ...user, ...derived };
+      localStorage.setItem(DEMO_USER_KEY, JSON.stringify(migrated));
+      return migrated;
+    }
+    return user;
+  } catch {
+    return null;
+  }
+}
+
+function isBackendUnavailable(err) {
+  return !err?.status || err.status >= 500;
+}
+
 const api = {
   request,
 
-  login(email, password) {
-    return request('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password })
-    });
+  async login(email, password) {
+    try {
+      return await request('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      });
+    } catch (err) {
+      if (!isBackendUnavailable(err)) throw err;
+      const existing = getDemoUser();
+      if (existing?.email === email) return { ok: true, demo: true };
+      createDemoUser(email, { source: "login" });
+      return { ok: true, demo: true };
+    }
   },
 
-  signup(email, password, payload = null) {
+  async signup(email, password, payload = null) {
     const extra = (payload && typeof payload === "object") ? payload : { displayName: payload };
-    return request('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({ email, password, ...extra })
-    });
+    try {
+      return await request('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({ email, password, ...extra })
+      });
+    } catch (err) {
+      if (!isBackendUnavailable(err)) throw err;
+      const user = createDemoUser(email, extra);
+      return { userId: user.id, demo: true };
+    }
   },
 
-  me() {
-    return request('/me');
+  async me() {
+    try {
+      return await request('/me');
+    } catch (err) {
+      const demoUser = getDemoUser();
+      if (demoUser && (err?.status === 401 || isBackendUnavailable(err))) {
+        return { user: demoUser, demo: true };
+      }
+      throw err;
+    }
   },
 
-  logout() {
-    return request('/auth/logout', {
-      method: 'POST'
-    });
+  async logout() {
+    localStorage.removeItem(DEMO_USER_KEY);
+    try {
+      return await request('/auth/logout', {
+        method: 'POST'
+      });
+    } catch (err) {
+      if (!isBackendUnavailable(err)) throw err;
+      return { ok: true, demo: true };
+    }
   },
 
   // Stream generation with retry support

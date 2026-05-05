@@ -1,89 +1,44 @@
-# 🎓 LESSON.LAB v1.0.5
+# Teach and Study
 
-Professional next-generation automated lesson planning system built with **React 18**, **Vite (Rolldown)**, and **Tailwind CSS 4**. Designed for educators who value speed, efficiency, and bold design.
+AI-платформа для учителей и учеников. Проект помогает учителям быстрее готовить уроки, тесты и материалы, а ученикам и родителям удобнее подбирать проверенных преподавателей.
 
-## 🚀 Key Features
-* **Trilingual Support**: Full localization for Kazakh, Russian, and English.
-* **Smart Navigation (Hub)**: Dedicated zones for Teachers (Tools) and Students (Games).
-* **GitHub-Style Profile**: Personalized user dashboard with editable profile data (John Doe @Guest).
-* **Dynamic Auth**: Secure login/registration system with real-time validation and password hashing.
-* **Smart History**: Manage, edit, and store your generated plans with an intuitive UI.
-* **Dark/Light Mode**: High-contrast brutalist design that respects your eyes.
-* **AI-Powered**: Ready to integrate with Google Gemini for instant plan generation.
-* **Fullstack Ready**: Backend API integration with PHP 8.1 and Supabase (PostgreSQL).
-* **History**: History of generetions is stored in Database.
-* **Cache**: All Api requests now cached.
+## Основная идея
+
+- Специализированный AI для образовательных задач, а не универсальный чат.
+- Инструменты для учителей: планы уроков, тесты, презентации, учебные материалы.
+- Ученическая зона: тесты, обучающие игры, прогресс и подбор преподавателей.
+- Локализация для Казахстана с возможностью масштабирования на международный рынок.
 
 ## Tech Stack
-- Framework: React 18
-- Bundler: Rolldown/Vite (Experimental high-speed build)
-- Styling: Tailwind CSS v4.0
-- Icons: Lucide React
-- Markdown: ReactMarkdown
-- postreSQL via supabase
-- PHP 8.5 version
-- Composer https://getcomposer.org/download/
-  
 
-## Getting Started
+- React 18
+- Vite / Rolldown
+- Tailwind CSS
+- Lucide React
+- PHP backend
+- Supabase / PostgreSQL
 
-1. Clone and Install (..\lesson-planner-main):
+## Запуск
 
-   ```bash
-   git clone https://github.com/hilexa-hlxa/lesson-planner.git
-   cd lesson-planner
-   npm install
+```bash
+npm install
+npm run dev
+```
 
-2. Composer install (..\lesson-planner-main\backend):
-   ```bash
-   composer install
+Backend:
 
-   composer require phpoffice/phpword
+```bash
+cd backend
+composer install
+php -S 127.0.0.1:8000 -t public
+```
 
-3. Launch Development Servers
-Run Frontend (..\lesson-planner-main):
+Docker:
 
-    ```bash
+```bash
+docker-compose up -d --build
+```
 
-    npm run dev
+## Контекст
 
-4. Run backend (..\lesson-planner-main):
-    ```bash
-    
-    php -S 127.0.0.1:8000 -t backend/public
-    
-5. Docker Deployment (Alternative)
-Bash
-    ```bash
-    
-    docker-compose up -d --build
-
-    
-🏗 Project Structure
-/src — React components (Landing, Hub, Dashboard, Profile).
-
-/backend — PHP API and Supabase logic.
-
-api.js — Axios-like fetch wrapper for backend communication.
-
-📄 License
-© 2026 LESSON.LAB / CORE_SYSTEM. Created for professional educators.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Проект адаптирован под презентацию Teach and Study: экономия времени учителей, AI-инструменты, каталог преподавателей и фокус на удобстве для учеников и родителей.

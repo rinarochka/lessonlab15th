@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Play, Lock, Gamepad2, Search } from 'lucide-react';
+import { Play, Gamepad2, Search, UserRound } from 'lucide-react';
 import { tr } from "../lib/i18n";
 import Header from "../components/Header";
 import api from '../api';
@@ -102,7 +102,7 @@ const GamesPage = ({ lang, setLang, user, setUser }) => {
         <p className="text-xl text-slate-500 font-bold mb-16 max-w-2xl ml-20">
            {lang === 'EN' ? "Your zone. Take quizzes and level up." : 
             lang === 'KZ' ? "Сіздің аймағыңыз. Тест тапсырып, деңгейіңізді көтеріңіз." : 
-            "Твоя зона. Проходи тесты и поднимай уровень."}
+            "Твоя зона. Проходи тесты, тренируйся и выбирай преподавателя."}
         </p>
 
         {/* Форма для ввода темы */}
@@ -181,6 +181,30 @@ const GamesPage = ({ lang, setLang, user, setUser }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           
           {/* 1. ВОЙТИ В ТЕСТ */}
+          <Link 
+            to="/teachers" 
+            className="group bg-white dark:bg-zinc-900 p-10 rounded-[40px] border-[4px] border-black dark:border-white shadow-[8px_8px_0px_0px_#10b981] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all flex flex-col justify-between h-[360px]"
+          >
+            <div>
+              <div className="w-20 h-20 bg-green-600 text-white rounded-3xl flex items-center justify-center mb-8 border-4 border-black dark:border-white/20">
+                <UserRound size={40} />
+              </div>
+              <h3 className="text-3xl font-black uppercase tracking-tight mb-4">
+                {lang === 'EN' ? "Choose Teacher" : lang === 'KZ' ? "Оқытушы таңдау" : "Выбрать препода"}
+              </h3>
+              <p className="text-slate-500 font-bold text-lg leading-tight">
+                {lang === 'EN' ? "Find a tutor by subject, level, price, and rating." : 
+                 lang === 'KZ' ? "Пән, деңгей, баға және рейтинг бойынша оқытушы табыңыз." : 
+                 "Найди преподавателя по предмету, уровню, цене и рейтингу."}
+              </p>
+            </div>
+            <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+               <span className="font-black uppercase text-sm tracking-widest bg-green-600 text-white px-6 py-3 rounded-full">
+                {lang === 'EN' ? "CHOOSE" : lang === 'KZ' ? "ТАҢДАУ" : "ВЫБРАТЬ"}
+               </span>
+            </div>
+          </Link>
+
           <Link 
             to="/join-test" 
             className="group bg-white dark:bg-zinc-900 p-10 rounded-[40px] border-[4px] border-black dark:border-white shadow-[8px_8px_0px_0px_#000] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all flex flex-col justify-between h-[360px]"
