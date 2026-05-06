@@ -132,17 +132,6 @@ export default function LandingPage({ lang, setLang, setIsAuthOpen, setAuthMode,
         </div>
       </header>
 
-      <section className="border-y border-slate-200 dark:border-zinc-800 bg-white/60 dark:bg-black/30">
-        <div className="max-w-7xl mx-auto px-6 sm:px-10 py-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-          {content.stats.map(([value, label]) => (
-            <div key={value} className="flex items-baseline gap-4">
-              <div className="text-4xl font-black text-blue-600">{value}</div>
-              <div className="text-sm font-black uppercase tracking-widest text-slate-500">{label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
       <section className="max-w-7xl mx-auto px-6 sm:px-10 py-16 grid grid-cols-1 md:grid-cols-3 gap-6">
         {content.values.map(([title, text], index) => {
           const Icon = icons[index];
